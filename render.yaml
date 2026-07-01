@@ -5,7 +5,8 @@ services:
     region: oregon
     plan: free
     buildCommand: npm install && npm run build
-    startCommand: npm run start
+    startCommand: node .output/server/index.mjs
+    healthCheckPath: /
     envVars:
       - key: NODE_VERSION
         value: 20
@@ -13,5 +14,9 @@ services:
         value: node-server
       - key: VITE_SUPABASE_URL
         sync: false
-      - key: VITE_SUPABASE_ANON_KEY
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
         sync: false

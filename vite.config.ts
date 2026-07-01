@@ -12,12 +12,9 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  // Use node-server preset for Render deployment (instead of default Cloudflare)
-  vite: {
-    define: {
-      "process.env.NITRO_PRESET": JSON.stringify(
-        process.env.NITRO_PRESET ?? "node-server"
-      ),
-    },
+  // Hard-pin node-server preset for Render deployment.
+  // The NITRO_PRESET env var on Render also ensures this is respected.
+  nitro: {
+    preset: "node-server",
   },
 });
