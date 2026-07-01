@@ -12,8 +12,7 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  // Hard-pin node-server preset for Render deployment.
-  // The NITRO_PRESET env var on Render also ensures this is respected.
+  // node-server preset for Render. The @vercel/nft ESM shim is applied via postinstall.
   nitro: {
     preset: "node-server",
   },
