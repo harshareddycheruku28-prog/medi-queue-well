@@ -12,8 +12,8 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  // node-server preset for Render. The @vercel/nft ESM shim is applied via postinstall.
+  // vercel preset for Vercel deployment. Generates .vercel/output with serverless functions.
   nitro: {
-    preset: "node-server",
+    preset: "vercel",
   },
 });
