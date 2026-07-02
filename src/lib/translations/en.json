@@ -1,0 +1,19 @@
+{
+  "emergency_button": "Emergency",
+  "emergency_prompt": "Emergency Assistance",
+  "emergency_description": "Need urgent help? Choose an option below.",
+  "call_emergency": "Call Emergency Services",
+  "find_nearest_hospital": "Find Nearest Hospital",
+  "find_hospital": "Find Hospital",
+  "symptom_checker": "Symptom Checker",
+  "prescriptions": "Prescriptions",
+  "payments": "Payments",
+  "nearby_hospitals": "Nearby Hospitals",
+  "language": "Language",
+  "search": "Search",
+  "filter": "Filter",
+  "rating": "Rating",
+  "distance": "Distance",
+  "insurance": "Insurance",
+  "fee_range": "Fee Range"
+}

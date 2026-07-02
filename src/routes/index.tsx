@@ -16,7 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, rolePath } from "@/lib/auth";
-
+import { LanguageSelector } from '@/components/language-selector';
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -80,6 +80,7 @@ function Home() {
               About
             </a>
           </nav>
+      <LanguageSelector />
           <div className="flex items-center gap-2">
             {user && role ? (
               <Button asChild size="sm">
