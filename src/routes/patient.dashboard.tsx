@@ -44,6 +44,30 @@ function Page() {
         <h1 className="text-3xl font-bold">Welcome back</h1>
         <p className="text-muted-foreground">Manage your appointments and watch the live queue.</p>
       </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="bg-gradient-to-br from-amber-500/10 to-orange-600/10 border-orange-200 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-orange-700 text-xl">Check Symptoms & Find Hospital</CardTitle>
+            <CardDescription className="text-orange-800/70">Describe how you feel, and our AI will suggest the right department and nearby hospitals.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild className="w-full bg-orange-600 hover:bg-orange-700 text-white shadow-md">
+              <Link to="/patient/symptom-checker">Check Symptoms</Link>
+            </Button>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-teal-500/10 to-emerald-600/10 border-teal-200 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-teal-700 text-xl">Find Nearby Hospital</CardTitle>
+            <CardDescription className="text-teal-800/70">Search for hospitals near you on the map and book a slot instantly.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild className="w-full bg-teal-600 hover:bg-teal-700 text-white shadow-md">
+              <Link to="/patient/find-hospital">Find Hospital</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={Calendar} label="Upcoming" value={upcoming.length} />
         <StatCard icon={Activity} label="Total visits" value={appts.length} />
@@ -101,9 +125,9 @@ function Page() {
             <CardTitle>Quick actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Button asChild className="w-full">
-              <Link to="/patient/book">
-                <Calendar className="mr-2 h-4 w-4" /> Book appointment
+            <Button asChild variant="outline" className="w-full">
+              <Link to="/patient/symptom-checker">
+                <Activity className="mr-2 h-4 w-4" /> Symptom Checker
               </Link>
             </Button>
             <Button asChild variant="outline" className="w-full">

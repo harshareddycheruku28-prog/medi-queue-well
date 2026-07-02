@@ -15,8 +15,10 @@ import { Route as ReceptionistWalkinRouteImport } from './routes/receptionist.wa
 import { Route as ReceptionistSearchRouteImport } from './routes/receptionist.search'
 import { Route as ReceptionistDoctorsRouteImport } from './routes/receptionist.doctors'
 import { Route as ReceptionistDashboardRouteImport } from './routes/receptionist.dashboard'
+import { Route as PatientSymptomCheckerRouteImport } from './routes/patient.symptom-checker'
 import { Route as PatientQueueRouteImport } from './routes/patient.queue'
 import { Route as PatientProfileRouteImport } from './routes/patient.profile'
+import { Route as PatientFindHospitalRouteImport } from './routes/patient.find-hospital'
 import { Route as PatientDashboardRouteImport } from './routes/patient.dashboard'
 import { Route as PatientBookRouteImport } from './routes/patient.book'
 import { Route as PatientAppointmentsRouteImport } from './routes/patient.appointments'
@@ -55,6 +57,11 @@ const ReceptionistDashboardRoute = ReceptionistDashboardRouteImport.update({
   path: '/receptionist/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PatientSymptomCheckerRoute = PatientSymptomCheckerRouteImport.update({
+  id: '/patient/symptom-checker',
+  path: '/patient/symptom-checker',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PatientQueueRoute = PatientQueueRouteImport.update({
   id: '/patient/queue',
   path: '/patient/queue',
@@ -63,6 +70,11 @@ const PatientQueueRoute = PatientQueueRouteImport.update({
 const PatientProfileRoute = PatientProfileRouteImport.update({
   id: '/patient/profile',
   path: '/patient/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PatientFindHospitalRoute = PatientFindHospitalRouteImport.update({
+  id: '/patient/find-hospital',
+  path: '/patient/find-hospital',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PatientDashboardRoute = PatientDashboardRouteImport.update({
@@ -111,8 +123,10 @@ export interface FileRoutesByFullPath {
   '/patient/appointments': typeof PatientAppointmentsRoute
   '/patient/book': typeof PatientBookRoute
   '/patient/dashboard': typeof PatientDashboardRoute
+  '/patient/find-hospital': typeof PatientFindHospitalRoute
   '/patient/profile': typeof PatientProfileRoute
   '/patient/queue': typeof PatientQueueRoute
+  '/patient/symptom-checker': typeof PatientSymptomCheckerRoute
   '/receptionist/dashboard': typeof ReceptionistDashboardRoute
   '/receptionist/doctors': typeof ReceptionistDoctorsRoute
   '/receptionist/search': typeof ReceptionistSearchRoute
@@ -128,8 +142,10 @@ export interface FileRoutesByTo {
   '/patient/appointments': typeof PatientAppointmentsRoute
   '/patient/book': typeof PatientBookRoute
   '/patient/dashboard': typeof PatientDashboardRoute
+  '/patient/find-hospital': typeof PatientFindHospitalRoute
   '/patient/profile': typeof PatientProfileRoute
   '/patient/queue': typeof PatientQueueRoute
+  '/patient/symptom-checker': typeof PatientSymptomCheckerRoute
   '/receptionist/dashboard': typeof ReceptionistDashboardRoute
   '/receptionist/doctors': typeof ReceptionistDoctorsRoute
   '/receptionist/search': typeof ReceptionistSearchRoute
@@ -146,8 +162,10 @@ export interface FileRoutesById {
   '/patient/appointments': typeof PatientAppointmentsRoute
   '/patient/book': typeof PatientBookRoute
   '/patient/dashboard': typeof PatientDashboardRoute
+  '/patient/find-hospital': typeof PatientFindHospitalRoute
   '/patient/profile': typeof PatientProfileRoute
   '/patient/queue': typeof PatientQueueRoute
+  '/patient/symptom-checker': typeof PatientSymptomCheckerRoute
   '/receptionist/dashboard': typeof ReceptionistDashboardRoute
   '/receptionist/doctors': typeof ReceptionistDoctorsRoute
   '/receptionist/search': typeof ReceptionistSearchRoute
@@ -165,8 +183,10 @@ export interface FileRouteTypes {
     | '/patient/appointments'
     | '/patient/book'
     | '/patient/dashboard'
+    | '/patient/find-hospital'
     | '/patient/profile'
     | '/patient/queue'
+    | '/patient/symptom-checker'
     | '/receptionist/dashboard'
     | '/receptionist/doctors'
     | '/receptionist/search'
@@ -182,8 +202,10 @@ export interface FileRouteTypes {
     | '/patient/appointments'
     | '/patient/book'
     | '/patient/dashboard'
+    | '/patient/find-hospital'
     | '/patient/profile'
     | '/patient/queue'
+    | '/patient/symptom-checker'
     | '/receptionist/dashboard'
     | '/receptionist/doctors'
     | '/receptionist/search'
@@ -199,8 +221,10 @@ export interface FileRouteTypes {
     | '/patient/appointments'
     | '/patient/book'
     | '/patient/dashboard'
+    | '/patient/find-hospital'
     | '/patient/profile'
     | '/patient/queue'
+    | '/patient/symptom-checker'
     | '/receptionist/dashboard'
     | '/receptionist/doctors'
     | '/receptionist/search'
@@ -217,8 +241,10 @@ export interface RootRouteChildren {
   PatientAppointmentsRoute: typeof PatientAppointmentsRoute
   PatientBookRoute: typeof PatientBookRoute
   PatientDashboardRoute: typeof PatientDashboardRoute
+  PatientFindHospitalRoute: typeof PatientFindHospitalRoute
   PatientProfileRoute: typeof PatientProfileRoute
   PatientQueueRoute: typeof PatientQueueRoute
+  PatientSymptomCheckerRoute: typeof PatientSymptomCheckerRoute
   ReceptionistDashboardRoute: typeof ReceptionistDashboardRoute
   ReceptionistDoctorsRoute: typeof ReceptionistDoctorsRoute
   ReceptionistSearchRoute: typeof ReceptionistSearchRoute
@@ -269,6 +295,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReceptionistDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/patient/symptom-checker': {
+      id: '/patient/symptom-checker'
+      path: '/patient/symptom-checker'
+      fullPath: '/patient/symptom-checker'
+      preLoaderRoute: typeof PatientSymptomCheckerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/patient/queue': {
       id: '/patient/queue'
       path: '/patient/queue'
@@ -281,6 +314,13 @@ declare module '@tanstack/react-router' {
       path: '/patient/profile'
       fullPath: '/patient/profile'
       preLoaderRoute: typeof PatientProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/patient/find-hospital': {
+      id: '/patient/find-hospital'
+      path: '/patient/find-hospital'
+      fullPath: '/patient/find-hospital'
+      preLoaderRoute: typeof PatientFindHospitalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/patient/dashboard': {
@@ -345,8 +385,10 @@ const rootRouteChildren: RootRouteChildren = {
   PatientAppointmentsRoute: PatientAppointmentsRoute,
   PatientBookRoute: PatientBookRoute,
   PatientDashboardRoute: PatientDashboardRoute,
+  PatientFindHospitalRoute: PatientFindHospitalRoute,
   PatientProfileRoute: PatientProfileRoute,
   PatientQueueRoute: PatientQueueRoute,
+  PatientSymptomCheckerRoute: PatientSymptomCheckerRoute,
   ReceptionistDashboardRoute: ReceptionistDashboardRoute,
   ReceptionistDoctorsRoute: ReceptionistDoctorsRoute,
   ReceptionistSearchRoute: ReceptionistSearchRoute,

@@ -25,6 +25,8 @@ type NavItem = { to: string; label: string; icon: typeof Home };
 const navByRole: Record<Role, NavItem[]> = {
   patient: [
     { to: "/patient/dashboard", label: "Dashboard", icon: Home },
+    { to: "/patient/find-hospital", label: "Find Hospital", icon: Hospital },
+    { to: "/patient/symptom-checker", label: "Symptom Checker", icon: Stethoscope },
     { to: "/patient/book", label: "Book Appointment", icon: Calendar },
     { to: "/patient/appointments", label: "My Appointments", icon: Activity },
     { to: "/patient/queue", label: "Live Queue", icon: Users },

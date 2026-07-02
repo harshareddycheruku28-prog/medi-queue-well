@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { hospitals } from "@/lib/mock-data";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar as CalIcon, CheckCircle2, Loader2 } from "lucide-react";
@@ -15,6 +16,11 @@ import { generateSlots, dayOfWeekIso } from "@/lib/slots";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/patient/book")({
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      hospitalId: search.hospitalId as string | undefined,
+    };
+  },
   component: () => (
     <RoleGuard role="patient">
       <Page />
@@ -35,10 +41,17 @@ function Page() {
   const [busy, setBusy] = useState(false);
   const [confirmed, setConfirmed] = useState<any>(null);
 
-  const { data: departments = [] } = useQuery({
+  const { hospitalId } = Route.useSearch();
+  const selectedHospital = hospitals.find(h => h.id === hospitalId);
+
+  const { data: allDepartments = [] } = useQuery({
     queryKey: ["departments"],
     queryFn: async () => (await supabase.from("departments").select("*").order("name")).data ?? [],
   });
+
+  const departments = selectedHospital 
+    ? allDepartments.filter(d => selectedHospital.departments.includes(d.code))
+    : allDepartments;
 
   const { data: doctors = [] } = useQuery<any[]>({
     queryKey: ["doctors", departmentId],
@@ -165,6 +178,20 @@ function Page() {
           />
         ))}
       </div>
+      
+      {selectedHospital && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-4">
+          <img src={selectedHospital.imageUrl} alt={selectedHospital.name} className="w-16 h-16 rounded-lg object-cover shadow-sm hidden sm:block" />
+          <div>
+            <h2 className="font-bold text-lg text-amber-900">{selectedHospital.name}</h2>
+            <p className="text-sm text-amber-800">{selectedHospital.address}</p>
+            <div className="mt-2 text-xs font-semibold text-amber-700 bg-amber-200/50 inline-block px-2 py-1 rounded">
+              Selected Hospital
+            </div>
+          </div>
+        </div>
+      )}
+
       <Card>
         <CardContent className="space-y-4 p-6">
           {step === 1 && (
