@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { LiveQueueBoard } from "@/components/live-queue-board";
 import { Button } from "@/components/ui/button";
 import { Hospital, Home } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export const Route = createFileRoute("/queue")({
   head: () => ({
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/queue")({
 });
 
 function QueuePage() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="border-b border-border bg-background">
@@ -31,14 +33,14 @@ function QueuePage() {
           </Link>
           <Button asChild variant="outline" size="sm">
             <Link to="/">
-              <Home className="mr-1 h-4 w-4" /> Home
+              <Home className="mr-1 h-4 w-4" /> {t("nav_home")}
             </Link>
           </Button>
         </div>
       </header>
       <div className="mx-auto max-w-6xl px-4 py-8">
-        <h1 className="text-3xl font-bold">Live Queue</h1>
-        <p className="text-muted-foreground">Updates automatically — no refresh needed.</p>
+        <h1 className="text-3xl font-bold">{t("live_queue_title")}</h1>
+        <p className="text-muted-foreground">{t("live_queue_subtitle")}</p>
         <div className="mt-6">
           <LiveQueueBoard />
         </div>

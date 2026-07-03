@@ -1,14 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { RoleGuard } from "@/components/role-guard";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 
 export const Route = createFileRoute("/doctor/availability")({
   component: () => (
@@ -30,122 +32,122 @@ const DAYS = [
 
 function Page() {
   const { user } = useAuth();
-  const [doctorId, setId] = useState<string>("");
-  const [start, setStart] = useState("09:00");
-  const [end, setEnd] = useState("17:00");
-  const [slot, setSlot] = useState(15);
-  const [maxPer, setMax] = useState(30);
-  const [days, setDays] = useState<number[]>([1, 2, 3, 4, 5]);
-  const [specialization, setSpec] = useState("");
+  const { t } = useTranslation();
+
+  const { data: doctor, refetch } = useQuery({
+    queryKey: ["avail-doctor", user?.id],
+    enabled: !!user,
+    queryFn: async () =>
+      (await supabase.from("doctors").select("*").eq("profile_id", user!.id).maybeSingle()).data,
+  });
+
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [slotMinutes, setSlotMinutes] = useState(15);
+  const [maxPatients, setMaxPatients] = useState(30);
+  const [workingDays, setWorkingDays] = useState<number[]>([]);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("doctors")
-      .select("*")
-      .eq("profile_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!data) return;
-        setId(data.id);
-        setStart(String(data.start_time).slice(0, 5));
-        setEnd(String(data.end_time).slice(0, 5));
-        setSlot(data.slot_minutes);
-        setMax(data.max_patients_per_day);
-        setDays(data.working_days as number[]);
-        setSpec(data.specialization ?? "");
-      });
-  }, [user]);
+    if (doctor) {
+      setStartTime(String(doctor.start_time).slice(0, 5));
+      setEndTime(String(doctor.end_time).slice(0, 5));
+      setSlotMinutes(doctor.slot_minutes);
+      setMaxPatients(doctor.max_patients_per_day);
+      setWorkingDays(doctor.working_days as number[]);
+    }
+  }, [doctor]);
 
   const save = async () => {
-    if (!doctorId) return toast.error("Doctor profile missing");
+    if (!doctor) return;
     setBusy(true);
     const { error } = await supabase
       .from("doctors")
       .update({
-        start_time: start + ":00",
-        end_time: end + ":00",
-        slot_minutes: slot,
-        max_patients_per_day: maxPer,
-        working_days: days,
-        specialization,
+        start_time: startTime,
+        end_time: endTime,
+        slot_minutes: slotMinutes,
+        max_patients_per_day: maxPatients,
+        working_days: workingDays,
       })
-      .eq("id", doctorId);
+      .eq("id", doctor.id);
     setBusy(false);
     if (error) toast.error(error.message);
-    else toast.success("Saved");
+    else {
+      toast.success(t("dr_avail_success_toast"));
+      refetch();
+    }
   };
 
-  const toggleDay = (d: number) =>
-    setDays((cur) => (cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d].sort()));
+  const toggleDay = (day: number) => {
+    setWorkingDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort(),
+    );
+  };
+
+  if (!doctor) return null;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="mx-auto max-w-xl space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Availability</h1>
-        <p className="text-muted-foreground">Used to generate bookable slots.</p>
+        <h1 className="text-3xl font-bold">{t("dr_avail_title")}</h1>
+        <p className="text-muted-foreground">{t("dr_avail_subtitle")}</p>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Schedule</CardTitle>
-          <CardDescription>
-            Patients can only book slots within these hours on these days.
-          </CardDescription>
+          <CardTitle>{t("dr_avail_shift_timing")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-1">
-            <Label>Specialization</Label>
-            <Input value={specialization} onChange={(e) => setSpec(e.target.value)} />
-          </div>
-          <div>
-            <Label className="mb-2 block">Working days</Label>
-            <div className="flex flex-wrap gap-2">
-              {DAYS.map(([lbl, n]) => (
-                <label
-                  key={n}
-                  className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm ${days.includes(n as number) ? "border-primary bg-primary/5" : "border-border"}`}
-                >
-                  <Checkbox
-                    checked={days.includes(n as number)}
-                    onCheckedChange={() => toggleDay(n as number)}
-                  />
-                  {lbl}
-                </label>
-              ))}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <Label>{t("dr_avail_start_time")}</Label>
+              <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+            </div>
+            <div className="space-y-1">
+              <Label>{t("dr_avail_end_time")}</Label>
+              <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
-              <Label>Start time</Label>
-              <Input type="time" value={start} onChange={(e) => setStart(e.target.value)} />
-            </div>
-            <div className="space-y-1">
-              <Label>End time</Label>
-              <Input type="time" value={end} onChange={(e) => setEnd(e.target.value)} />
-            </div>
-            <div className="space-y-1">
-              <Label>Slot length (min)</Label>
+              <Label>{t("dr_avail_slot_duration")}</Label>
               <Input
                 type="number"
                 min={5}
                 max={120}
-                value={slot}
-                onChange={(e) => setSlot(parseInt(e.target.value) || 15)}
+                value={slotMinutes}
+                onChange={(e) => setSlotMinutes(parseInt(e.target.value) || 15)}
               />
             </div>
             <div className="space-y-1">
-              <Label>Max patients / day</Label>
+              <Label>{t("dr_avail_max_patients")}</Label>
               <Input
                 type="number"
                 min={1}
-                value={maxPer}
-                onChange={(e) => setMax(parseInt(e.target.value) || 30)}
+                value={maxPatients}
+                onChange={(e) => setMaxPatients(parseInt(e.target.value) || 30)}
               />
             </div>
           </div>
+          <div className="space-y-2">
+            <Label>{t("dr_avail_active_days")}</Label>
+            <div className="flex flex-wrap gap-3">
+              {DAYS.map(([name, val]) => (
+                <div key={val} className="flex items-center gap-1.5">
+                  <Checkbox
+                    id={`day-${val}`}
+                    checked={workingDays.includes(val)}
+                    onCheckedChange={() => toggleDay(val)}
+                  />
+                  <Label htmlFor={`day-${val}`} className="cursor-pointer">
+                    {t(name)}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
           <Button onClick={save} disabled={busy}>
-            Save changes
+            {t("dr_avail_save_btn")}
           </Button>
         </CardContent>
       </Card>

@@ -4,6 +4,7 @@ import { RoleGuard } from "@/components/role-guard";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { LiveQueueBoard } from "@/components/live-queue-board";
+import { useTranslation } from "@/lib/i18n";
 
 export const Route = createFileRoute("/patient/queue")({
   component: () => (
@@ -16,6 +17,8 @@ export const Route = createFileRoute("/patient/queue")({
 function Page() {
   const { user } = useAuth();
   const today = new Date().toISOString().slice(0, 10);
+  const { t } = useTranslation();
+
   const { data: myToday } = useQuery({
     queryKey: ["my-today", user?.id],
     enabled: !!user,
@@ -36,8 +39,8 @@ function Page() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Live Queue</h1>
-        <p className="text-muted-foreground">Your token is highlighted. Updates automatically.</p>
+        <h1 className="text-3xl font-bold">{t("live_queue_title")}</h1>
+        <p className="text-muted-foreground">{t("live_queue_subtitle")}</p>
       </div>
       <LiveQueueBoard highlightToken={myToday?.token_code} />
     </div>

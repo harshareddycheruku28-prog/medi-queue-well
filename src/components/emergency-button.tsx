@@ -25,10 +25,10 @@ export const EmergencyButton = () => {
             <DialogDescription>{t('emergency_description')}</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 mt-4">
-            <Button variant="outline" className="w-full" onClick={() => alert('Calling emergency services')}>
+            <Button variant="outline" className="w-full" onClick={() => alert(t('calling_emergency_services_alert'))}>
               <Phone className="mr-2 h-4 w-4" /> {t('call_emergency')}
             </Button>
-            <Button variant="outline" className="w-full" onClick={() => alert('Opening map')}>
+            <Button variant="outline" className="w-full" onClick={() => alert(t('opening_map_alert'))}>
               <MapPin className="mr-2 h-4 w-4" /> {t('find_nearest_hospital')}
             </Button>
           </div>

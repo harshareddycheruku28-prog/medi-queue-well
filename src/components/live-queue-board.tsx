@@ -4,10 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Activity, Clock, Users } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export function LiveQueueBoard({ highlightToken }: { highlightToken?: string }) {
   const today = new Date().toISOString().slice(0, 10);
   const qc = useQueryClient();
+  const { t } = useTranslation();
 
   const { data } = useQuery({
     queryKey: ["live-queue", today],
@@ -34,7 +36,7 @@ export function LiveQueueBoard({ highlightToken }: { highlightToken?: string }) 
     };
   }, [qc]);
 
-  if (!data) return <div className="text-muted-foreground">Loading live queue…</div>;
+  if (!data) return <div className="text-muted-foreground">{t("live_queue_loading")}</div>;
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -50,7 +52,7 @@ export function LiveQueueBoard({ highlightToken }: { highlightToken?: string }) 
           <Card key={d.id}>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{d.name}</CardTitle>
+                <CardTitle className="text-lg">{t("dept_name_" + d.name)}</CardTitle>
                 <Badge variant="outline" className="font-mono">
                   {d.code}
                 </Badge>
@@ -58,7 +60,7 @@ export function LiveQueueBoard({ highlightToken }: { highlightToken?: string }) 
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-lg bg-primary/5 p-4 text-center">
-                <div className="text-xs uppercase text-muted-foreground">Now serving</div>
+                <div className="text-xs uppercase text-muted-foreground">{t("live_queue_serving")}</div>
                 <div className="mt-1 font-mono text-3xl font-bold text-primary">
                   {current ? current.token_code : "—"}
                 </div>
@@ -67,16 +69,16 @@ export function LiveQueueBoard({ highlightToken }: { highlightToken?: string }) 
                 <div className="rounded-md bg-muted p-2">
                   <Users className="mx-auto mb-1 h-4 w-4 text-muted-foreground" />
                   <div className="font-semibold">{waiting.length}</div>
-                  <div className="text-xs text-muted-foreground">Waiting</div>
+                  <div className="text-xs text-muted-foreground">{t("live_queue_waiting_lbl")}</div>
                 </div>
                 <div className="rounded-md bg-muted p-2">
                   <Clock className="mx-auto mb-1 h-4 w-4 text-muted-foreground" />
                   <div className="font-semibold">~{waiting.length * d.avg_wait_minutes}m</div>
-                  <div className="text-xs text-muted-foreground">Est. wait</div>
+                  <div className="text-xs text-muted-foreground">{t("live_queue_est_wait_lbl")}</div>
                 </div>
               </div>
               <div>
-                <div className="mb-2 text-xs font-medium text-muted-foreground">Up next</div>
+                <div className="mb-2 text-xs font-medium text-muted-foreground">{t("live_queue_up_next")}</div>
                 <div className="flex flex-wrap gap-1">
                   {waiting.slice(0, 8).map((a) => (
                     <Badge
@@ -88,19 +90,18 @@ export function LiveQueueBoard({ highlightToken }: { highlightToken?: string }) 
                     </Badge>
                   ))}
                   {waiting.length === 0 && (
-                    <span className="text-xs text-muted-foreground">No patients waiting</span>
+                    <span className="text-xs text-muted-foreground">{t("live_queue_no_patients")}</span>
                   )}
                 </div>
               </div>
               {highlightToken && dAppts.some((a) => a.token_code === highlightToken) && (
                 <div className="rounded-md border border-primary/30 bg-primary/5 p-2 text-center text-xs">
                   <Activity className="mr-1 inline h-3 w-3 text-primary" />
-                  Your token <span className="font-mono font-bold">{highlightToken}</span> —
                   {(() => {
                     const idx = waiting.findIndex((a) => a.token_code === highlightToken);
                     return idx >= 0
-                      ? ` ${idx} patient(s) ahead · ~${idx * d.avg_wait_minutes}m wait`
-                      : " in progress";
+                      ? t("live_queue_your_status", { token: highlightToken, count: idx, wait: idx * d.avg_wait_minutes })
+                      : t("live_queue_your_status_in_progress", { token: highlightToken });
                   })()}
                 </div>
               )}

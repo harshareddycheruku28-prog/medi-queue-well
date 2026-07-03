@@ -17,6 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, rolePath } from "@/lib/auth";
 import { LanguageSelector } from '@/components/language-selector';
+import { useTranslation } from '@/lib/i18n';
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -34,6 +36,7 @@ export const Route = createFileRoute("/")({
 function Home() {
   const { user, role } = useAuth();
   const today = new Date().toISOString().slice(0, 10);
+  const { t } = useTranslation();
 
   const { data: departments = [] } = useQuery({
     queryKey: ["departments-with-stats", today],
@@ -71,31 +74,31 @@ function Home() {
           </Link>
           <nav className="hidden items-center gap-6 text-sm md:flex">
             <a href="#departments" className="text-muted-foreground hover:text-foreground">
-              Departments
+              {t("nav_departments")}
             </a>
             <Link to="/queue" className="text-muted-foreground hover:text-foreground">
-              Live Queue
+              {t("nav_live_queue")}
             </Link>
             <a href="#about" className="text-muted-foreground hover:text-foreground">
-              About
+              {t("nav_about")}
             </a>
           </nav>
       <LanguageSelector />
           <div className="flex items-center gap-2">
             {user && role ? (
               <Button asChild size="sm">
-                <Link to={rolePath[role]}>Dashboard</Link>
+                <Link to={rolePath[role]}>{t("nav_dashboard")}</Link>
               </Button>
             ) : (
               <>
                 <Button asChild variant="ghost" size="sm">
                   <Link to="/auth/$role" params={{ role: "patient" }}>
-                    Patient Login
+                    {t("nav_patient_login")}
                   </Link>
                 </Button>
                 <Button asChild size="sm">
                   <Link to="/auth/$role" params={{ role: "patient" }} search={{ tab: "signup" }}>
-                    Sign up
+                    {t("nav_signup")}
                   </Link>
                 </Button>
               </>
@@ -112,20 +115,18 @@ function Home() {
         />
         <div className="relative z-10 mx-auto max-w-6xl px-4 py-20 text-black sm:py-28">
           <Badge variant="secondary" className="mb-4 bg-white/70 text-black border-black/10">
-            <ShieldCheck className="mr-1 h-3 w-3" /> Trusted by 10,000+ patients
+            <ShieldCheck className="mr-1 h-3 w-3" /> {t("hero_trusted_badge")}
           </Badge>
           <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight text-black sm:text-6xl">
-            Skip the wait. <span className="opacity-90">Arrive when it's your turn.</span>
+            {t("hero_title_skip_wait")} <span className="opacity-90">{t("hero_title_arrive_turn")}</span>
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-black opacity-90">
-            Book hospital appointments online, get an instant token, and track the live queue in
-            real time. MediQueue helps you spend less time in the waiting room and more time on what
-            matters.
+            {t("hero_description")}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
               <Link to="/patient/book">
-                <Calendar className="mr-2 h-4 w-4" /> Book Appointment
+                <Calendar className="mr-2 h-4 w-4" /> {t("hero_btn_book")}
               </Link>
             </Button>
             <Button
@@ -135,20 +136,20 @@ function Home() {
               className="border-black/30 bg-white/60 text-black hover:bg-white/80"
             >
               <Link to="/queue">
-                <Users className="mr-2 h-4 w-4" /> View Live Queue
+                <Users className="mr-2 h-4 w-4" /> {t("hero_btn_view_queue")}
               </Link>
             </Button>
           </div>
           <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-4">
             {[
-              { label: "Avg. wait saved", value: "42m" },
-              { label: "Departments", value: "5" },
-              { label: "Daily tokens", value: "300+" },
-              { label: "Realtime", value: "Live" },
+              { labelKey: "hero_stat_wait_saved", value: "42m" },
+              { labelKey: "hero_stat_departments", value: "5" },
+              { labelKey: "hero_stat_daily_tokens", value: "300+" },
+              { labelKey: "hero_stat_realtime", value: t("hero_stat_live") },
             ].map((s) => (
-              <div key={s.label} className="text-black">
+              <div key={s.labelKey} className="text-black">
                 <div className="text-3xl font-bold text-black">{s.value}</div>
-                <div className="text-sm text-black opacity-80">{s.label}</div>
+                <div className="text-sm text-black opacity-80">{t(s.labelKey)}</div>
               </div>
             ))}
           </div>
@@ -161,26 +162,26 @@ function Home() {
           {[
             {
               icon: Calendar,
-              title: "Book in seconds",
-              desc: "Pick a department, doctor, and time slot. Get a token instantly.",
+              titleKey: "about_book_title",
+              descKey: "about_book_desc",
             },
             {
               icon: Activity,
-              title: "Live updates",
-              desc: "Watch the queue advance in real time so you know exactly when to arrive.",
+              titleKey: "about_live_title",
+              descKey: "about_live_desc",
             },
             {
               icon: Stethoscope,
-              title: "Doctor-friendly",
-              desc: "Doctors call, skip, or complete with a click. Patients see status update instantly.",
+              titleKey: "about_doctor_title",
+              descKey: "about_doctor_desc",
             },
           ].map((f) => (
-            <div key={f.title} className="rounded-xl border border-border bg-card p-6">
+            <div key={f.titleKey} className="rounded-xl border border-border bg-card p-6">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
                 <f.icon className="h-5 w-5" />
               </div>
-              <h3 className="mt-3 text-lg font-semibold">{f.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{f.desc}</p>
+              <h3 className="mt-3 text-lg font-semibold">{t(f.titleKey)}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{t(f.descKey)}</p>
             </div>
           ))}
         </div>
@@ -191,14 +192,14 @@ function Home() {
         <div className="mx-auto max-w-6xl px-4">
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-bold">Departments</h2>
+              <h2 className="text-3xl font-bold">{t("departments_title")}</h2>
               <p className="mt-1 text-muted-foreground">
-                Live token, average wait, and available doctors.
+                {t("departments_subtitle")}
               </p>
             </div>
             <Button asChild variant="outline">
               <Link to="/queue">
-                Full Live Queue <ChevronRight className="ml-1 h-4 w-4" />
+                {t("departments_btn_full_queue")} <ChevronRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -212,26 +213,26 @@ function Home() {
                     </Badge>
                     <Stethoscope className="h-4 w-4 text-primary" />
                   </div>
-                  <CardTitle className="mt-2">{d.name}</CardTitle>
-                  <CardDescription>{d.description}</CardDescription>
+                  <CardTitle className="mt-2">{t("dept_name_" + d.name)}</CardTitle>
+                  <CardDescription>{t("dept_desc_" + d.name)}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="rounded-lg bg-muted p-3">
-                      <div className="text-xs text-muted-foreground">Current</div>
+                      <div className="text-xs text-muted-foreground">{t("dept_current")}</div>
                       <div className="text-lg font-bold text-primary">{d.current_token || "—"}</div>
                     </div>
                     <div className="rounded-lg bg-muted p-3">
-                      <div className="text-xs text-muted-foreground">Avg wait</div>
+                      <div className="text-xs text-muted-foreground">{t("dept_avg_wait")}</div>
                       <div className="text-lg font-bold">{d.avg_wait_minutes}m</div>
                     </div>
                     <div className="rounded-lg bg-muted p-3">
-                      <div className="text-xs text-muted-foreground">Doctors</div>
+                      <div className="text-xs text-muted-foreground">{t("dept_doctors")}</div>
                       <div className="text-lg font-bold">{d.doctor_count}</div>
                     </div>
                   </div>
                   <Button asChild className="mt-4 w-full" size="sm">
-                    <Link to="/patient/book">Book {d.name}</Link>
+                    <Link to="/patient/book">{t("book_dept", { name: t("dept_name_" + d.name) })}</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -245,23 +246,23 @@ function Home() {
         <div className="rounded-2xl border border-border bg-card p-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold">Live queue, right now</h2>
-              <p className="text-muted-foreground">Realtime status across all departments.</p>
+              <h2 className="text-2xl font-bold">{t("live_preview_title")}</h2>
+              <p className="text-muted-foreground">{t("live_preview_subtitle")}</p>
             </div>
             <Button asChild>
               <Link to="/queue">
-                <Clock className="mr-2 h-4 w-4" /> Open Live Board
+                <Clock className="mr-2 h-4 w-4" /> {t("live_preview_btn_open")}
               </Link>
             </Button>
           </div>
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {departments.map((d) => (
               <div key={d.id} className="rounded-lg border border-border p-4">
-                <div className="text-xs font-medium text-muted-foreground">{d.name}</div>
+                <div className="text-xs font-medium text-muted-foreground">{t("dept_name_" + d.name)}</div>
                 <div className="mt-1 font-mono text-2xl font-bold text-primary">
                   {d.code}-{String(d.current_token || 0).padStart(3, "0")}
                 </div>
-                <div className="mt-1 text-xs text-muted-foreground">Now serving</div>
+                <div className="mt-1 text-xs text-muted-foreground">{t("live_now_serving")}</div>
               </div>
             ))}
           </div>
@@ -271,26 +272,26 @@ function Home() {
       {/* Staff portals */}
       <section className="bg-muted/40 py-16">
         <div className="mx-auto max-w-6xl px-4">
-          <h2 className="text-center text-3xl font-bold">Staff Portals</h2>
+          <h2 className="text-center text-3xl font-bold">{t("staff_portals_title")}</h2>
           <div className="mx-auto mt-8 grid max-w-4xl gap-4 md:grid-cols-3">
             {[
               {
                 role: "patient" as const,
                 icon: UserPlus,
-                title: "Patient Login",
-                desc: "Book and track appointments",
+                titleKey: "portal_patient_login",
+                descKey: "portal_patient_desc",
               },
               {
                 role: "receptionist" as const,
                 icon: Hospital,
-                title: "Receptionist Login",
-                desc: "Manage today's appointments",
+                titleKey: "portal_receptionist_login",
+                descKey: "portal_receptionist_desc",
               },
               {
                 role: "doctor" as const,
                 icon: Stethoscope,
-                title: "Doctor Login",
-                desc: "Run your daily queue",
+                titleKey: "portal_doctor_login",
+                descKey: "portal_doctor_desc",
               },
             ].map((p) => (
               <Link
@@ -302,8 +303,8 @@ function Home() {
                 <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
                   <p.icon className="h-5 w-5" />
                 </div>
-                <h3 className="mt-3 font-semibold group-hover:text-primary">{p.title}</h3>
-                <p className="text-sm text-muted-foreground">{p.desc}</p>
+                <h3 className="mt-3 font-semibold group-hover:text-primary">{t(p.titleKey)}</h3>
+                <p className="text-sm text-muted-foreground">{t(p.descKey)}</p>
               </Link>
             ))}
           </div>
@@ -314,12 +315,12 @@ function Home() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-6 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="MediQueue Logo" className="h-5 w-5 object-contain" />
-            <span>MediQueue Hospital</span>
+            <span>{t("footer_hospital_name")}</span>
           </div>
           <div className="text-right">
-            <div>© {new Date().getFullYear()} MediQueue. All rights reserved.</div>
+            <div>{t("footer_copyright", { year: new Date().getFullYear() })}</div>
             <div className="text-xs text-muted-foreground/80 mt-1 font-medium">
-              Done by students of AI
+              {t("footer_ai_students")}
             </div>
           </div>
         </div>

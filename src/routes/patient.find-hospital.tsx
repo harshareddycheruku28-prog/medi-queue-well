@@ -32,10 +32,10 @@ function FindHospitalPage() {
       <header className="px-4 sm:px-6 lg:px-8 pt-6 pb-4">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#92400e' }}>
-            🏥 Find Nearby Hospitals
+            🏥 {t("find_hosp_title")}
           </h1>
           <p className="text-sm mt-1" style={{ color: '#b45309' }}>
-            Search, filter, and locate hospitals near you on the map
+            {t("find_hosp_subtitle")}
           </p>
         </div>
       </header>
@@ -49,16 +49,16 @@ function FindHospitalPage() {
                 <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white text-sm" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
                   🔍
                 </span>
-                Filters
+                {t("find_hosp_filters")}
               </h2>
 
               {/* Search */}
               <label className="block text-xs font-medium mb-1" style={{ color: '#b45309' }}>
-                Search
+                {t("find_hosp_search_lbl")}
               </label>
               <input
                 type="text"
-                placeholder="Hospital name or address…"
+                placeholder={t("find_hosp_search_placeholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full mb-4 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 outline-none"
@@ -79,7 +79,7 @@ function FindHospitalPage() {
 
               {/* Min Rating */}
               <label className="block text-xs font-medium mb-1" style={{ color: '#b45309' }}>
-                Minimum Rating
+                {t("find_hosp_min_rating")}
               </label>
               <div className="flex items-center gap-2 mb-4">
                 <input
@@ -98,7 +98,7 @@ function FindHospitalPage() {
 
               {/* Max Distance */}
               <label className="block text-xs font-medium mb-1" style={{ color: '#b45309' }}>
-                Max Distance (km)
+                {t("find_hosp_max_distance")}
               </label>
               <div className="flex items-center gap-2 mb-4">
                 <input
@@ -118,7 +118,9 @@ function FindHospitalPage() {
               {/* Result Count */}
               <div className="mt-2 pt-3" style={{ borderTop: '1px solid #fde68a' }}>
                 <p className="text-xs" style={{ color: '#b45309' }}>
-                  Showing <span className="font-bold text-sm" style={{ color: '#92400e' }}>{filtered.length}</span> hospital{filtered.length !== 1 ? 's' : ''}
+                  {filtered.length === 1
+                    ? t("find_hosp_showing_count_single")
+                    : t("find_hosp_showing_count", { count: filtered.length })}
                 </p>
               </div>
             </div>
@@ -149,10 +151,10 @@ function FindHospitalPage() {
                 <div className="col-span-full text-center py-12">
                   <div className="text-5xl mb-3">🏥</div>
                   <p className="text-lg font-semibold" style={{ color: '#92400e' }}>
-                    No hospitals found
+                    {t("find_hosp_none_found")}
                   </p>
                   <p className="text-sm" style={{ color: '#b45309' }}>
-                    Try adjusting your filters or search terms
+                    {t("find_hosp_none_found_desc")}
                   </p>
                 </div>
               )}
@@ -174,6 +176,7 @@ function HospitalCard({
   isSelected: boolean;
   onClick: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       onClick={onClick}
@@ -189,7 +192,7 @@ function HospitalCard({
       <div className="relative h-36 overflow-hidden">
         <img
           src={h.imageUrl}
-          alt={h.name}
+          alt={t(h.name)}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
           onError={(e) => {
             // Fallback gradient when image is missing
@@ -221,29 +224,29 @@ function HospitalCard({
 
         {/* Name overlay */}
         <div className="absolute bottom-0 left-0 right-0 px-4 pb-3">
-          <h3 className="text-lg font-bold text-white drop-shadow-md">{h.name}</h3>
+          <h3 className="text-lg font-bold text-white drop-shadow-md">{t(h.name)}</h3>
         </div>
       </div>
 
       {/* Card body */}
       <div className="p-4">
         <p className="text-xs mb-3 flex items-center gap-1" style={{ color: '#b45309' }}>
-          📍 {h.address}
+          📍 {t(h.address)}
         </p>
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-2 mb-3">
-          <StatBadge icon="📏" label="Distance" value={`${h.distanceKm} km`} />
-          <StatBadge icon="👥" label="Queue" value={`${h.currentQueueLength}`} />
-          <StatBadge icon="⏱️" label="Wait" value={`${h.estimatedWaitMinutes}m`} />
+          <StatBadge icon="📏" label={t("find_hosp_card_distance")} value={`${h.distanceKm} km`} />
+          <StatBadge icon="👥" label={t("find_hosp_card_queue")} value={`${h.currentQueueLength}`} />
+          <StatBadge icon="⏱️" label={t("find_hosp_card_wait")} value={`${h.estimatedWaitMinutes}m`} />
         </div>
 
         {/* Feature tags */}
         <div className="flex flex-wrap gap-1.5 mb-3">
-          {h.pharmacy && <FeatureTag label="💊 Pharmacy" />}
-          {h.bloodBank && <FeatureTag label="🩸 Blood Bank" />}
-          {h.parking && <FeatureTag label="🅿️ Parking" />}
-          {h.government && <FeatureTag label="🏛️ Govt" />}
+          {h.pharmacy && <FeatureTag label={t("find_hosp_card_pharmacy")} />}
+          {h.bloodBank && <FeatureTag label={t("find_hosp_card_blood_bank")} />}
+          {h.parking && <FeatureTag label={t("find_hosp_card_parking")} />}
+          {h.government && <FeatureTag label={t("find_hosp_card_govt")} />}
         </div>
 
         {/* Departments */}
@@ -271,7 +274,7 @@ function HospitalCard({
               className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all duration-200 hover:opacity-90 hover:shadow-md block text-center"
               style={{ background: 'linear-gradient(135deg, #14b8a6, #0d9488)' }}
             >
-              View Details
+              {t("find_hosp_card_btn_details")}
             </Link>
             <Link
               to="/patient/book"
@@ -279,7 +282,7 @@ function HospitalCard({
               className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all duration-200 hover:opacity-90 hover:shadow-md block text-center"
               style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}
             >
-              Book Queue
+              {t("find_hosp_card_btn_book")}
             </Link>
           </div>
         </div>

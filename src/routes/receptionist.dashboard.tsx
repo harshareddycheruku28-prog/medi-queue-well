@@ -1,14 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { RoleGuard } from "@/components/role-guard";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, UserPlus, Calendar } from "lucide-react";
+import { UserPlus, Search, Stethoscope } from "lucide-react";
 import { StatusBadge } from "./patient.dashboard";
-import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 
 export const Route = createFileRoute("/receptionist/dashboard")({
   component: () => (
@@ -20,7 +19,7 @@ export const Route = createFileRoute("/receptionist/dashboard")({
 
 function Page() {
   const today = new Date().toISOString().slice(0, 10);
-  const qc = useQueryClient();
+  const { t } = useTranslation();
 
   const { data: appts = [] } = useQuery({
     queryKey: ["recep-today", today],
@@ -29,99 +28,68 @@ function Page() {
         await supabase
           .from("appointments")
           .select(
-            "*, departments(name, code), doctors(profiles:profile_id(full_name)), patient:profiles!appointments_patient_id_fkey(full_name, phone)",
+            "*, patient:profiles!appointments_patient_id_fkey(full_name), doctor:doctors(profiles:profile_id(full_name))",
           )
           .eq("appointment_date", today)
-          .order("slot_time")
+          .order("created_at", { ascending: false })
       ).data ?? [],
   });
 
-  useEffect(() => {
-    const ch = supabase
-      .channel("recep-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "appointments" }, () => {
-        qc.invalidateQueries({ queryKey: ["recep-today"] });
-      })
-      .subscribe();
-    return () => {
-      supabase.removeChannel(ch);
-    };
-  }, [qc]);
-
-  const cancel = async (id: string) => {
-    const { error } = await supabase
-      .from("appointments")
-      .update({ status: "cancelled" })
-      .eq("id", id);
-    if (error) toast.error(error.message);
-    else toast.success("Cancelled");
-  };
-
-  const counts = {
-    total: appts.length,
-    waiting: appts.filter((a) => a.status === "waiting").length,
-    inProgress: appts.filter((a) => a.status === "in_progress").length,
+  const stats = {
+    booked: appts.length,
     completed: appts.filter((a) => a.status === "completed").length,
+    active: appts.filter((a) => a.status === "in_progress" || a.status === "waiting").length,
   };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Receptionist Dashboard</h1>
-          <p className="text-muted-foreground">All appointments for today.</p>
+          <h1 className="text-3xl font-bold">{t("recep_dash_title")}</h1>
+          <p className="text-muted-foreground">{t("recep_dash_recent_subtitle")}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button asChild>
             <Link to="/receptionist/walkin">
-              <UserPlus className="mr-2 h-4 w-4" /> Walk-in
+              <UserPlus className="mr-2 h-4 w-4" /> {t("recep_dash_btn_walkin")}
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/receptionist/doctors">
+              <Stethoscope className="mr-2 h-4 w-4" /> {t("recep_dash_btn_doctors")}
             </Link>
           </Button>
           <Button asChild variant="outline">
             <Link to="/receptionist/search">
-              <Search className="mr-2 h-4 w-4" /> Search
+              <Search className="mr-2 h-4 w-4" /> {t("recep_dash_btn_search")}
             </Link>
           </Button>
         </div>
       </div>
-      <div className="grid gap-3 sm:grid-cols-4">
-        {[
-          { l: "Today total", v: counts.total },
-          { l: "Waiting", v: counts.waiting },
-          { l: "In progress", v: counts.inProgress },
-          { l: "Completed", v: counts.completed },
-        ].map((s) => (
-          <Card key={s.l}>
-            <CardContent className="p-4">
-              <div className="text-xs text-muted-foreground">{s.l}</div>
-              <div className="text-2xl font-bold">{s.v}</div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="grid gap-3 sm:grid-cols-3">
+        <StatCard title={t("recep_dash_booked_count")} val={stats.booked} />
+        <StatCard title={t("recep_dash_completed_count")} val={stats.completed} />
+        <StatCard title={t("recep_dash_active_count")} val={stats.active} />
       </div>
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" /> Today's appointments
-          </CardTitle>
+          <CardTitle>{t("recep_dash_upcoming_appts")}</CardTitle>
         </CardHeader>
         <CardContent>
           {appts.length === 0 ? (
             <div className="rounded border border-dashed p-8 text-center text-muted-foreground">
-              No appointments today.
+              {t("dr_queue_no_appts")}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-left text-xs uppercase text-muted-foreground">
                   <tr>
-                    <th className="p-2">Token</th>
-                    <th className="p-2">Patient</th>
-                    <th className="p-2">Doctor</th>
-                    <th className="p-2">Dept</th>
-                    <th className="p-2">Slot</th>
-                    <th className="p-2">Status</th>
-                    <th className="p-2">Actions</th>
+                    <th className="p-2">{t("dr_queue_th_token")}</th>
+                    <th className="p-2">{t("dr_queue_th_patient")}</th>
+                    <th className="p-2">{t("book_app_doctor_lbl")}</th>
+                    <th className="p-2">{t("dr_queue_th_slot")}</th>
+                    <th className="p-2">{t("dr_queue_th_status")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -132,22 +100,11 @@ function Page() {
                           {a.token_code}
                         </Badge>
                       </td>
-                      <td className="p-2">
-                        <div className="font-medium">{a.patient?.full_name}</div>
-                        <div className="text-xs text-muted-foreground">{a.patient?.phone}</div>
-                      </td>
-                      <td className="p-2">Dr. {a.doctors?.profiles?.full_name}</td>
-                      <td className="p-2">{a.departments?.name}</td>
+                      <td className="p-2 font-medium">{a.patient?.full_name}</td>
+                      <td className="p-2">Dr. {a.doctor?.profiles?.full_name}</td>
                       <td className="p-2">{a.slot_time?.slice(0, 5)}</td>
                       <td className="p-2">
                         <StatusBadge status={a.status as string} />
-                      </td>
-                      <td className="p-2">
-                        {a.status === "waiting" && (
-                          <Button size="sm" variant="outline" onClick={() => cancel(a.id)}>
-                            Cancel
-                          </Button>
-                        )}
                       </td>
                     </tr>
                   ))}

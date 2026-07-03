@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 
 export const Route = createFileRoute("/patient/profile")({
   component: () => (
@@ -22,6 +23,7 @@ function Page() {
   const [full_name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!user) return;
@@ -47,34 +49,34 @@ function Page() {
       .eq("id", user.id);
     setBusy(false);
     if (error) toast.error(error.message);
-    else toast.success("Profile updated");
+    else toast.success(t("profile_updated_toast"));
   };
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Profile</h1>
-        <p className="text-muted-foreground">Keep your contact details up to date.</p>
+        <h1 className="text-3xl font-bold">{t("profile_title")}</h1>
+        <p className="text-muted-foreground">{t("profile_subtitle")}</p>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Personal info</CardTitle>
+          <CardTitle>{t("profile_personal_info")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="space-y-1">
-            <Label>Email</Label>
+            <Label>{t("profile_email")}</Label>
             <Input value={user?.email ?? ""} disabled />
           </div>
           <div className="space-y-1">
-            <Label>Full name</Label>
+            <Label>{t("profile_fullname")}</Label>
             <Input value={full_name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="space-y-1">
-            <Label>Phone</Label>
+            <Label>{t("profile_phone")}</Label>
             <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
           </div>
           <Button onClick={save} disabled={busy}>
-            Save changes
+            {t("profile_save_btn")}
           </Button>
         </CardContent>
       </Card>

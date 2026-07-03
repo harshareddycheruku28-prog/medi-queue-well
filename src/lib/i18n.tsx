@@ -1,40 +1,65 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-
-type Translations = Record<string, string>;
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import en from '../../locales/en.json';
+import hi from '../../locales/hi.json';
+import te from '../../locales/te.json';
 
 type Language = 'en' | 'te' | 'hi';
 
-const translationFiles: Record<Language, string> = {
-  en: '/translations/en.json',
-  te: '/translations/te.json',
-  hi: '/translations/hi.json',
+const translations: Record<Language, any> = {
+  en,
+  hi,
+  te,
 };
 
 interface I18nContextProps {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, replacements?: Record<string, string | number>) => string;
 }
 
 const I18nContext = createContext<I18nContextProps | undefined>(undefined);
 
 export const I18nProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>('en');
-  const [translations, setTranslations] = useState<Translations>({});
+  const [language, setLanguageState] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('language') as Language | null;
+      if (stored === 'en' || stored === 'hi' || stored === 'te') {
+        return stored;
+      }
+    }
+    return 'en';
+  });
 
-  useEffect(() => {
-    const stored = localStorage.getItem('language') as Language | null;
-    if (stored) setLanguage(stored);
-  }, []);
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('language', lang);
+    }
+  };
 
-  useEffect(() => {
-    import(`./translations/${language}.json`)
-      .then((mod) => setTranslations(mod.default))
-      .catch(() => setTranslations({}));
-    localStorage.setItem('language', language);
-  }, [language]);
+  const t = (key: string, replacements?: Record<string, string | number>) => {
+    let text = translations[language]?.[key];
+    
+    // Fallback to English
+    if (text === undefined || text === null) {
+      text = translations['en']?.[key];
+    }
+    
+    // Return key if missing
+    if (text === undefined || text === null) {
+      return key;
+    }
 
-  const t = (key: string) => translations[key] ?? key;
+    if (replacements) {
+      let result = text;
+      Object.entries(replacements).forEach(([k, v]) => {
+        result = result.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+      });
+      return result;
+    }
+
+    return text;
+  };
 
   return (
     <I18nContext.Provider value={{ language, setLanguage, t }}>

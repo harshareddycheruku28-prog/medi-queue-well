@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { generateSlots, dayOfWeekIso } from "@/lib/slots";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 
 export const Route = createFileRoute("/patient/book")({
   validateSearch: (search: Record<string, unknown>) => {
@@ -40,6 +41,7 @@ function Page() {
   const [symptoms, setSymptoms] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirmed, setConfirmed] = useState<any>(null);
+  const { t } = useTranslation();
 
   const { hospitalId } = Route.useSearch();
   const selectedHospital = hospitals.find(h => h.id === hospitalId);
@@ -117,7 +119,7 @@ function Page() {
     }
     setConfirmed(data);
     setBusy(false);
-    toast.success("Appointment booked!");
+    toast.success(t("book_app_success_toast"));
   };
 
   if (confirmed) {
@@ -128,34 +130,34 @@ function Page() {
             <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-success/15 text-success">
               <CheckCircle2 className="h-7 w-7" />
             </div>
-            <CardTitle className="mt-2 text-2xl">Appointment confirmed</CardTitle>
+            <CardTitle className="mt-2 text-2xl">{t("book_app_confirmed_title")}</CardTitle>
             <CardDescription>
-              Save your token and arrive a few minutes before your slot.
+              {t("book_app_confirmed_desc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-center">
             <div className="rounded-xl border border-primary/30 bg-primary/5 p-6">
-              <div className="text-xs uppercase text-muted-foreground">Your token</div>
+              <div className="text-xs uppercase text-muted-foreground">{t("book_app_your_token")}</div>
               <div className="mt-1 font-mono text-5xl font-bold text-primary">
                 {confirmed.token_code}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3 text-left text-sm">
-              <Info label="Department" value={confirmed.departments?.name} />
-              <Info label="Date" value={confirmed.appointment_date} />
-              <Info label="Slot" value={String(confirmed.slot_time).slice(0, 5)} />
-              <Info label="Status" value="Waiting" />
+              <Info label={t("book_app_dept_lbl")} value={t("dept_name_" + confirmed.departments?.name)} />
+              <Info label={t("book_app_summary_date")} value={confirmed.appointment_date} />
+              <Info label={t("book_app_summary_slot")} value={String(confirmed.slot_time).slice(0, 5)} />
+              <Info label={t("book_app_summary_status")} value={t("status_waiting")} />
             </div>
             <div className="flex gap-2">
               <Button onClick={() => navigate({ to: "/patient/queue" })} className="flex-1">
-                View live queue
+                {t("book_app_view_live_btn")}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => navigate({ to: "/patient/appointments" })}
                 className="flex-1"
               >
-                My appointments
+                {t("book_app_my_appts_btn")}
               </Button>
             </div>
           </CardContent>
@@ -167,8 +169,8 @@ function Page() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Book an appointment</h1>
-        <p className="text-muted-foreground">Step {step} of 5</p>
+        <h1 className="text-3xl font-bold">{t("book_app_title")}</h1>
+        <p className="text-muted-foreground">{t("book_app_step", { step })}</p>
       </div>
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
@@ -181,12 +183,12 @@ function Page() {
       
       {selectedHospital && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-4">
-          <img src={selectedHospital.imageUrl} alt={selectedHospital.name} className="w-16 h-16 rounded-lg object-cover shadow-sm hidden sm:block" />
+          <img src={selectedHospital.imageUrl} alt={t(selectedHospital.name)} className="w-16 h-16 rounded-lg object-cover shadow-sm hidden sm:block" />
           <div>
-            <h2 className="font-bold text-lg text-amber-900">{selectedHospital.name}</h2>
-            <p className="text-sm text-amber-800">{selectedHospital.address}</p>
+            <h2 className="font-bold text-lg text-amber-900">{t(selectedHospital.name)}</h2>
+            <p className="text-sm text-amber-800">{t(selectedHospital.address)}</p>
             <div className="mt-2 text-xs font-semibold text-amber-700 bg-amber-200/50 inline-block px-2 py-1 rounded">
-              Selected Hospital
+              {t("book_app_selected_hosp")}
             </div>
           </div>
         </div>
@@ -196,7 +198,7 @@ function Page() {
         <CardContent className="space-y-4 p-6">
           {step === 1 && (
             <div className="space-y-3">
-              <Label>Department</Label>
+              <Label>{t("book_app_dept_lbl")}</Label>
               <div className="grid gap-2 sm:grid-cols-2">
                 {departments.map((d) => (
                   <button
@@ -208,12 +210,12 @@ function Page() {
                     className={`rounded-lg border p-4 text-left transition hover:border-primary ${departmentId === d.id ? "border-primary bg-primary/5" : "border-border"}`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold">{d.name}</span>
+                      <span className="font-semibold">{t("dept_name_" + d.name)}</span>
                       <Badge variant="outline" className="font-mono">
                         {d.code}
                       </Badge>
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground">{d.description}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{t("dept_desc_" + d.name)}</p>
                   </button>
                 ))}
               </div>
@@ -221,10 +223,10 @@ function Page() {
           )}
           {step === 2 && (
             <div className="space-y-3">
-              <Label>Doctor</Label>
+              <Label>{t("book_app_doctor_lbl")}</Label>
               {doctors.length === 0 && (
                 <div className="rounded border border-dashed p-4 text-sm text-muted-foreground">
-                  No doctors registered in this department yet.
+                  {t("book_app_no_docs")}
                 </div>
               )}
               <div className="grid gap-2">
@@ -249,7 +251,7 @@ function Page() {
           )}
           {step === 3 && (
             <div className="space-y-3">
-              <Label>Date</Label>
+              <Label>{t("book_app_date_lbl")}</Label>
               <Input
                 type="date"
                 min={today}
@@ -257,16 +259,16 @@ function Page() {
                 onChange={(e) => setDate(e.target.value)}
               />
               <Button onClick={() => setStep(4)} disabled={!date}>
-                Next
+                {t("book_app_next_btn")}
               </Button>
             </div>
           )}
           {step === 4 && (
             <div className="space-y-3">
-              <Label>Available slots</Label>
+              <Label>{t("book_app_slots_lbl")}</Label>
               {slots.length === 0 ? (
                 <div className="rounded border border-dashed p-4 text-sm text-muted-foreground">
-                  Doctor not available on this day or no free slots. Pick another date.
+                  {t("book_app_doc_unavailable")}
                 </div>
               ) : (
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
@@ -288,29 +290,29 @@ function Page() {
           )}
           {step === 5 && (
             <div className="space-y-3">
-              <Label>Symptoms / reason for visit</Label>
+              <Label>{t("book_app_symptoms_lbl")}</Label>
               <Textarea
                 value={symptoms}
                 onChange={(e) => setSymptoms(e.target.value)}
                 rows={4}
-                placeholder="Describe your symptoms…"
+                placeholder={t("book_app_symptoms_placeholder")}
               />
               <div className="rounded-lg bg-muted p-3 text-sm">
-                <div className="font-medium">Summary</div>
+                <div className="font-medium">{t("book_app_summary_lbl")}</div>
                 <div className="mt-1 text-muted-foreground">
-                  {departments.find((d) => d.id === departmentId)?.name} · Dr.{" "}
+                  {t("dept_name_" + departments.find((d) => d.id === departmentId)?.name)} · Dr.{" "}
                   {doctor?.profiles?.full_name} · {date} · {slot.slice(0, 5)}
                 </div>
               </div>
               <Button onClick={submit} disabled={busy} className="w-full">
                 {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                <CalIcon className="mr-1 h-4 w-4" /> Confirm appointment
+                <CalIcon className="mr-1 h-4 w-4" /> {t("book_app_confirm_btn")}
               </Button>
             </div>
           )}
           {step > 1 && (
             <Button variant="ghost" size="sm" onClick={() => setStep(step - 1)}>
-              ← Back
+              {t("book_app_back_btn")}
             </Button>
           )}
         </CardContent>

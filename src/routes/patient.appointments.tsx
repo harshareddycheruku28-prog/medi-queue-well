@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from "@/lib/i18n";
 
 export const Route = createFileRoute("/patient/appointments")({
   component: () => (
@@ -31,6 +32,8 @@ export const Route = createFileRoute("/patient/appointments")({
 function Page() {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const { t } = useTranslation();
+
   const { data: appts = [] } = useQuery({
     queryKey: ["all-appts", user?.id],
     enabled: !!user,
@@ -54,7 +57,7 @@ function Page() {
       .eq("id", id);
     if (error) toast.error(error.message);
     else {
-      toast.success("Appointment cancelled");
+      toast.success(t("my_appts_cancelled_toast"));
       qc.invalidateQueries({ queryKey: ["all-appts"] });
     }
   };
@@ -62,17 +65,17 @@ function Page() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">My Appointments</h1>
-        <p className="text-muted-foreground">Past and upcoming bookings.</p>
+        <h1 className="text-3xl font-bold">{t("my_appts_title")}</h1>
+        <p className="text-muted-foreground">{t("my_appts_subtitle")}</p>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>All appointments</CardTitle>
+          <CardTitle>{t("my_appts_all")}</CardTitle>
         </CardHeader>
         <CardContent>
           {appts.length === 0 && (
             <div className="rounded border border-dashed p-8 text-center text-muted-foreground">
-              No appointments yet.
+              {t("my_appts_none")}
             </div>
           )}
           <div className="space-y-2">
@@ -86,7 +89,7 @@ function Page() {
                     <Badge variant="outline" className="font-mono text-base">
                       {a.token_code}
                     </Badge>
-                    <span className="font-semibold">{a.departments?.name}</span>
+                    <span className="font-semibold">{t("dept_name_" + a.departments?.name)}</span>
                     <StatusBadge status={a.status as string} />
                   </div>
                   <div className="mt-1 text-sm text-muted-foreground">
@@ -101,18 +104,18 @@ function Page() {
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="outline" size="sm">
-                        Cancel
+                        {t("my_appts_cancel_btn")}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Cancel appointment {a.token_code}?</AlertDialogTitle>
-                        <AlertDialogDescription>This cannot be undone.</AlertDialogDescription>
+                        <AlertDialogTitle>{t("my_appts_cancel_confirm_title", { token: a.token_code })}</AlertDialogTitle>
+                        <AlertDialogDescription>{t("my_appts_cancel_confirm_desc")}</AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Keep it</AlertDialogCancel>
+                        <AlertDialogCancel>{t("my_appts_cancel_keep")}</AlertDialogCancel>
                         <AlertDialogAction onClick={() => cancel(a.id)}>
-                          Cancel appointment
+                          {t("my_appts_cancel_confirm_btn")}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>

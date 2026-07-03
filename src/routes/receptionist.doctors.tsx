@@ -38,6 +38,7 @@ import {
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Stethoscope, Loader2 } from "lucide-react";
 import { createDoctor, updateDoctor, deleteDoctor } from "@/lib/doctors-admin.functions";
+import { useTranslation } from "@/lib/i18n";
 
 export const Route = createFileRoute("/receptionist/doctors")({
   component: () => (
@@ -76,6 +77,7 @@ function Page() {
   const createFn = useServerFn(createDoctor);
   const updateFn = useServerFn(updateDoctor);
   const deleteFn = useServerFn(deleteDoctor);
+  const { t } = useTranslation();
 
   const { data: departments = [] } = useQuery({
     queryKey: ["depts"],
@@ -119,7 +121,7 @@ function Page() {
           working_days,
         },
       });
-      toast.success("Doctor created");
+      toast.success(t("recep_docs_created_toast"));
       setCreateOpen(false);
       refresh();
     } catch (err: any) {
@@ -150,7 +152,7 @@ function Page() {
           working_days,
         },
       });
-      toast.success("Doctor updated");
+      toast.success(t("recep_docs_updated_toast"));
       setEditing(null);
       refresh();
     } catch (err: any) {
@@ -163,7 +165,7 @@ function Page() {
   const handleDelete = async (id: string) => {
     try {
       await deleteFn({ data: { doctor_id: id } });
-      toast.success("Doctor deleted");
+      toast.success(t("recep_docs_deleted_toast"));
       refresh();
     } catch (err: any) {
       toast.error(err?.message ?? "Failed to delete doctor");
@@ -174,37 +176,37 @@ function Page() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Doctors</h1>
-          <p className="text-muted-foreground">Create, edit and remove doctor accounts.</p>
+          <h1 className="text-3xl font-bold">{t("recep_docs_title")}</h1>
+          <p className="text-muted-foreground">{t("recep_docs_subtitle")}</p>
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
             <Button>
-              <Plus className="mr-2 h-4 w-4" /> New doctor
+              <Plus className="mr-2 h-4 w-4" /> {t("recep_docs_btn_add")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Create doctor</DialogTitle>
+              <DialogTitle>{t("recep_docs_modal_title")}</DialogTitle>
               <DialogDescription>
-                The doctor can sign in immediately with this email and password.
+                {t("recep_docs_modal_subtitle")}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreate} className="space-y-3">
               <DoctorFormFields departments={departments} />
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1">
-                  <Label>Email</Label>
+                  <Label>{t("auth_label_email")}</Label>
                   <Input name="email" type="email" required />
                 </div>
                 <div className="space-y-1">
-                  <Label>Password</Label>
+                  <Label>{t("auth_label_password")}</Label>
                   <Input name="password" type="password" required minLength={6} />
                 </div>
               </div>
               <DialogFooter>
                 <Button type="submit" disabled={busy}>
-                  {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Create doctor
+                  {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {t("recep_docs_btn_save")}
                 </Button>
               </DialogFooter>
             </form>
@@ -215,9 +217,8 @@ function Page() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Stethoscope className="h-5 w-5" /> All doctors
+            <Stethoscope className="h-5 w-5" /> {t("recep_docs_list_title")}
           </CardTitle>
-          <CardDescription>{doctors.length} total</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -226,31 +227,33 @@ function Page() {
             </div>
           ) : doctors.length === 0 ? (
             <div className="rounded border border-dashed p-8 text-center text-muted-foreground">
-              No doctors yet.
+              {t("recep_docs_none")}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-left text-xs uppercase text-muted-foreground">
                   <tr>
-                    <th className="p-2">Name</th>
-                    <th className="p-2">Department</th>
-                    <th className="p-2">Specialization</th>
-                    <th className="p-2">Hours</th>
-                    <th className="p-2">Contact</th>
-                    <th className="p-2 text-right">Actions</th>
+                    <th className="p-2">{t("recep_docs_th_name")}</th>
+                    <th className="p-2">{t("auth_label_department")}</th>
+                    <th className="p-2">{t("auth_label_specialization")}</th>
+                    <th className="p-2">{t("recep_docs_th_shift")}</th>
+                    <th className="p-2">{t("recep_docs_th_contact")}</th>
+                    <th className="p-2 text-right">{t("dr_queue_th_actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {doctors.map((d) => (
                     <tr key={d.id} className="border-t border-border">
                       <td className="p-2 font-medium">Dr. {d.profiles?.full_name}</td>
-                      <td className="p-2">{d.departments?.name}</td>
+                      <td className="p-2">
+                        <Badge variant="secondary">{t("dept_name_" + d.departments?.name)}</Badge>
+                      </td>
                       <td className="p-2">{d.specialization || "—"}</td>
                       <td className="p-2">
                         {String(d.start_time).slice(0, 5)}–{String(d.end_time).slice(0, 5)}
                       </td>
-                      <td className="p-2">
+                      <td className="p-2 text-xs">
                         <div>{d.profiles?.email}</div>
                         <div className="text-xs text-muted-foreground">{d.profiles?.phone}</div>
                       </td>
@@ -268,17 +271,16 @@ function Page() {
                             <AlertDialogContent>
                               <AlertDialogHeader>
                                 <AlertDialogTitle>
-                                  Delete Dr. {d.profiles?.full_name}?
+                                  {t("recep_docs_delete_title", { name: d.profiles?.full_name })}
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This removes the doctor's login and all their appointments. This
-                                  cannot be undone.
+                                  {t("recep_docs_delete_desc")}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{t("my_appts_cancel_btn")}</AlertDialogCancel>
                                 <AlertDialogAction onClick={() => handleDelete(d.id)}>
-                                  Delete
+                                  {t("recep_docs_btn_delete")}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
@@ -305,7 +307,7 @@ function Page() {
               <DoctorFormFields departments={departments} initial={editing} />
               <DialogFooter>
                 <Button type="submit" disabled={busy}>
-                  {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save changes
+                  {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {t("profile_save_btn")}
                 </Button>
               </DialogFooter>
             </form>
@@ -317,43 +319,44 @@ function Page() {
 }
 
 function DoctorFormFields({ departments, initial }: { departments: any[]; initial?: DoctorRow }) {
+  const { t } = useTranslation();
   const initDays = initial?.working_days ?? [1, 2, 3, 4, 5];
   return (
     <>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1">
-          <Label>Full name</Label>
+          <Label>{t("auth_label_fullname")}</Label>
           <Input name="full_name" defaultValue={initial?.profiles?.full_name ?? ""} required />
         </div>
         <div className="space-y-1">
-          <Label>Phone</Label>
+          <Label>{t("auth_label_phone")}</Label>
           <Input name="phone" defaultValue={initial?.profiles?.phone ?? ""} />
         </div>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1">
-          <Label>Department</Label>
+          <Label>{t("auth_label_department")}</Label>
           <Select name="department_id" defaultValue={initial?.department_id} required>
             <SelectTrigger>
-              <SelectValue placeholder="Select department" />
+              <SelectValue placeholder={t("auth_placeholder_select_dept")} />
             </SelectTrigger>
             <SelectContent>
               {departments.map((d) => (
                 <SelectItem key={d.id} value={d.id}>
-                  {d.name}
+                  {t("dept_name_" + d.name)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1">
-          <Label>Specialization</Label>
+          <Label>{t("auth_label_specialization")}</Label>
           <Input name="specialization" defaultValue={initial?.specialization ?? ""} />
         </div>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1">
-          <Label>Start time</Label>
+          <Label>{t("dr_avail_start_time")}</Label>
           <Input
             name="start_time"
             type="time"
@@ -362,7 +365,7 @@ function DoctorFormFields({ departments, initial }: { departments: any[]; initia
           />
         </div>
         <div className="space-y-1">
-          <Label>End time</Label>
+          <Label>{t("dr_avail_end_time")}</Label>
           <Input
             name="end_time"
             type="time"
@@ -371,7 +374,7 @@ function DoctorFormFields({ departments, initial }: { departments: any[]; initia
           />
         </div>
         <div className="space-y-1">
-          <Label>Slot length (min)</Label>
+          <Label>{t("dr_avail_slot_duration")}</Label>
           <Input
             name="slot_minutes"
             type="number"
@@ -382,7 +385,7 @@ function DoctorFormFields({ departments, initial }: { departments: any[]; initia
           />
         </div>
         <div className="space-y-1">
-          <Label>Max patients / day</Label>
+          <Label>{t("dr_avail_max_patients")}</Label>
           <Input
             name="max_patients_per_day"
             type="number"
@@ -393,7 +396,7 @@ function DoctorFormFields({ departments, initial }: { departments: any[]; initia
         </div>
       </div>
       <div>
-        <Label className="mb-2 block">Working days</Label>
+        <Label className="mb-2 block">{t("dr_avail_active_days")}</Label>
         <div className="flex flex-wrap gap-2">
           {DAYS.map(([lbl, n]) => (
             <label
@@ -406,7 +409,7 @@ function DoctorFormFields({ departments, initial }: { departments: any[]; initia
                 defaultChecked={initDays.includes(n as number)}
                 className="h-4 w-4 accent-primary"
               />
-              {lbl}
+              {t(lbl)}
             </label>
           ))}
         </div>

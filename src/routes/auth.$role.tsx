@@ -17,6 +17,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, rolePath, type Role } from "@/lib/auth";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 
 export const Route = createFileRoute("/auth/$role")({
   validateSearch: (s: Record<string, unknown>): { tab?: "login" | "signup" } => ({
@@ -27,13 +28,13 @@ export const Route = createFileRoute("/auth/$role")({
 
 const VALID_ROLES: Role[] = ["patient", "receptionist", "doctor"];
 const roleMeta = {
-  patient: { icon: UserIcon, title: "Patient Portal", desc: "Book and track your appointments." },
+  patient: { icon: UserIcon, titleKey: "auth_patient_portal_title", descKey: "auth_patient_portal_desc" },
   receptionist: {
     icon: UserPlus,
-    title: "Receptionist Portal",
-    desc: "Manage walk-ins and appointments.",
+    titleKey: "auth_receptionist_portal_title",
+    descKey: "auth_receptionist_portal_desc",
   },
-  doctor: { icon: Stethoscope, title: "Doctor Portal", desc: "Run your daily patient queue." },
+  doctor: { icon: Stethoscope, titleKey: "auth_doctor_portal_title", descKey: "auth_doctor_portal_desc" },
 };
 
 function AuthPage() {
@@ -43,6 +44,7 @@ function AuthPage() {
   const { user, role: userRole, loading, refreshRole } = useAuth();
   const [tab, setTab] = useState<"login" | "signup">(search.tab || "login");
   const [busy, setBusy] = useState(false);
+  const { t } = useTranslation();
 
   const safeRole = (VALID_ROLES.includes(role as Role) ? role : "patient") as Role;
   const Meta = roleMeta[safeRole];
@@ -73,7 +75,7 @@ function AuthPage() {
       return;
     }
     await refreshRole();
-    toast.success("Welcome back!");
+    toast.success(t("auth_success_welcome"));
     setBusy(false);
   };
 
@@ -111,7 +113,7 @@ function AuthPage() {
       }, 800);
     }
 
-    toast.success("Account created! You're signed in.");
+    toast.success(t("auth_success_created"));
     setBusy(false);
   };
 
@@ -130,12 +132,12 @@ function AuthPage() {
           <span className="text-lg font-bold">MediQueue</span>
         </Link>
         <div>
-          <h2 className="text-4xl font-bold leading-tight text-primary-foreground">{Meta.title}</h2>
-          <p className="mt-2 max-w-md text-lg text-primary-foreground opacity-90">{Meta.desc}</p>
+          <h2 className="text-4xl font-bold leading-tight text-primary-foreground">{t(Meta.titleKey)}</h2>
+          <p className="mt-2 max-w-md text-lg text-primary-foreground opacity-90">{t(Meta.descKey)}</p>
         </div>
         <div>
-          <p className="text-sm opacity-70">© {new Date().getFullYear()} MediQueue Hospital</p>
-          <p className="mt-1 text-xs opacity-50 font-medium">Done by students of AI</p>
+          <p className="text-sm opacity-70">© {new Date().getFullYear()} {t("footer_hospital_name")}</p>
+          <p className="mt-1 text-xs opacity-50 font-medium">{t("footer_ai_students")}</p>
         </div>
       </div>
       <div className="flex items-center justify-center p-6">
@@ -144,76 +146,76 @@ function AuthPage() {
             <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
               <Meta.icon className="h-5 w-5" />
             </div>
-            <CardTitle className="mt-2">{Meta.title}</CardTitle>
-            <CardDescription>{Meta.desc}</CardDescription>
+            <CardTitle className="mt-2">{t(Meta.titleKey)}</CardTitle>
+            <CardDescription>{t(Meta.descKey)}</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs value={tab} onValueChange={(v) => setTab(v as "login" | "signup")}>
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="signup">Sign up</TabsTrigger>
+                <TabsTrigger value="login">{t("auth_tab_login")}</TabsTrigger>
+                <TabsTrigger value="signup">{t("auth_tab_signup")}</TabsTrigger>
               </TabsList>
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-3">
                   <div className="space-y-1">
-                    <Label>Email</Label>
+                    <Label>{t("auth_label_email")}</Label>
                     <Input name="email" type="email" required />
                   </div>
                   <div className="space-y-1">
-                    <Label>Password</Label>
+                    <Label>{t("auth_label_password")}</Label>
                     <Input name="password" type="password" required minLength={6} />
                   </div>
                   <Button type="submit" className="w-full" disabled={busy}>
-                    {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Login
+                    {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {t("auth_tab_login")}
                   </Button>
                 </form>
               </TabsContent>
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-3">
                   <div className="space-y-1">
-                    <Label>Full name</Label>
+                    <Label>{t("auth_label_fullname")}</Label>
                     <Input name="full_name" required />
                   </div>
                   <div className="space-y-1">
-                    <Label>Phone</Label>
+                    <Label>{t("auth_label_phone")}</Label>
                     <Input name="phone" />
                   </div>
                   <div className="space-y-1">
-                    <Label>Email</Label>
+                    <Label>{t("auth_label_email")}</Label>
                     <Input name="email" type="email" required />
                   </div>
                   <div className="space-y-1">
-                    <Label>Password</Label>
+                    <Label>{t("auth_label_password")}</Label>
                     <Input name="password" type="password" required minLength={6} />
                   </div>
                   {safeRole === "doctor" && (
                     <>
                       <div className="space-y-1">
-                        <Label>Department</Label>
+                        <Label>{t("auth_label_department")}</Label>
                         <Select name="department_id" required>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select department" />
+                            <SelectValue placeholder={t("auth_placeholder_select_dept")} />
                           </SelectTrigger>
                           <SelectContent>
                             {departments.map((d) => (
                               <SelectItem key={d.id} value={d.id}>
-                                {d.name}
+                                {t("dept_name_" + d.name)}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
-                        <Label>Specialization</Label>
+                        <Label>{t("auth_label_specialization")}</Label>
                         <Input
                           name="specialization"
-                          placeholder="e.g. Interventional Cardiologist"
+                          placeholder={t("auth_placeholder_spec")}
                         />
                       </div>
                     </>
                   )}
                   <Button type="submit" className="w-full" disabled={busy}>
-                    {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Create account
+                    {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {t("auth_btn_create_account")}
                   </Button>
                 </form>
               </TabsContent>
@@ -221,11 +223,11 @@ function AuthPage() {
             <div className="mt-6 flex flex-wrap justify-center gap-3 text-xs text-muted-foreground">
               {VALID_ROLES.filter((r) => r !== safeRole).map((r) => (
                 <Link key={r} to="/auth/$role" params={{ role: r }} className="hover:text-primary">
-                  {r === "patient" ? "Patient" : r === "doctor" ? "Doctor" : "Receptionist"} login
+                  {t("auth_link_" + r + "_login")}
                 </Link>
               ))}
               <Link to="/" className="hover:text-primary">
-                ← Back to home
+                {t("auth_link_back_to_home")}
               </Link>
             </div>
           </CardContent>

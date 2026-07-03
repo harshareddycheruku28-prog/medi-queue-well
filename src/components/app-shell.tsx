@@ -19,29 +19,30 @@ import { useAuth, type Role } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useTranslation } from "@/lib/i18n";
 
-type NavItem = { to: string; label: string; icon: typeof Home };
+type NavItem = { to: string; labelKey: string; icon: typeof Home };
 
 const navByRole: Record<Role, NavItem[]> = {
   patient: [
-    { to: "/patient/dashboard", label: "Dashboard", icon: Home },
-    { to: "/patient/find-hospital", label: "Find Hospital", icon: Hospital },
-    { to: "/patient/symptom-checker", label: "Symptom Checker", icon: Stethoscope },
-    { to: "/patient/book", label: "Book Appointment", icon: Calendar },
-    { to: "/patient/appointments", label: "My Appointments", icon: Activity },
-    { to: "/patient/queue", label: "Live Queue", icon: Users },
-    { to: "/patient/profile", label: "Profile", icon: UserIcon },
+    { to: "/patient/dashboard", labelKey: "dashboard", icon: Home },
+    { to: "/patient/find-hospital", labelKey: "find_hospital", icon: Hospital },
+    { to: "/patient/symptom-checker", labelKey: "symptom_checker", icon: Stethoscope },
+    { to: "/patient/book", labelKey: "bookAppointment", icon: Calendar },
+    { to: "/patient/appointments", labelKey: "myAppointments", icon: Activity },
+    { to: "/patient/queue", labelKey: "liveQueue", icon: Users },
+    { to: "/patient/profile", labelKey: "profile", icon: UserIcon },
   ],
   receptionist: [
-    { to: "/receptionist/dashboard", label: "Dashboard", icon: Home },
-    { to: "/receptionist/walkin", label: "Walk-in Patient", icon: UserPlus },
-    { to: "/receptionist/doctors", label: "Doctors", icon: Stethoscope },
-    { to: "/receptionist/search", label: "Search Appointments", icon: Search },
+    { to: "/receptionist/dashboard", labelKey: "dashboard", icon: Home },
+    { to: "/receptionist/walkin", labelKey: "walkin_title", icon: UserPlus },
+    { to: "/receptionist/doctors", labelKey: "recep_docs_title", icon: Stethoscope },
+    { to: "/receptionist/search", labelKey: "recep_search_title", icon: Search },
   ],
   doctor: [
-    { to: "/doctor/dashboard", label: "Dashboard", icon: Home },
-    { to: "/doctor/queue", label: "Today's Queue", icon: Users },
-    { to: "/doctor/availability", label: "Availability", icon: Settings },
+    { to: "/doctor/dashboard", labelKey: "dashboard", icon: Home },
+    { to: "/doctor/queue", labelKey: "dr_queue_title", icon: Users },
+    { to: "/doctor/availability", labelKey: "dr_dash_btn_availability", icon: Settings },
   ],
 };
 
@@ -55,6 +56,8 @@ function SidebarBody({ role, onNavigate }: { role: Role; onNavigate?: () => void
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const items = navByRole[role];
   const RoleIcon = roleIcon[role];
+  const { t } = useTranslation();
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2 border-b border-border px-5 py-4">
@@ -62,7 +65,7 @@ function SidebarBody({ role, onNavigate }: { role: Role; onNavigate?: () => void
         <div className="min-w-0">
           <div className="truncate text-sm font-bold leading-tight">MediQueue</div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <RoleIcon className="h-3 w-3" /> <span className="capitalize">{role}</span>
+            <RoleIcon className="h-3 w-3" /> <span className="capitalize">{t(`auth_${role}_portal_title`)}</span>
           </div>
         </div>
       </div>
@@ -83,7 +86,7 @@ function SidebarBody({ role, onNavigate }: { role: Role; onNavigate?: () => void
               )}
             >
               <Icon className="h-4 w-4" />
-              {it.label}
+              {t(it.labelKey)}
             </Link>
           );
         })}
@@ -94,10 +97,10 @@ function SidebarBody({ role, onNavigate }: { role: Role; onNavigate?: () => void
           onClick={onNavigate}
           className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent"
         >
-          <Home className="h-4 w-4" /> Public Home
+          <Home className="h-4 w-4" /> {t("nav_public_home")}
         </Link>
         <div className="px-3 text-[10px] text-muted-foreground/60 font-medium">
-          Done by students of AI
+          {t("nav_ai_students")}
         </div>
       </div>
     </div>
@@ -109,6 +112,8 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
+
   const handleSignOut = async () => {
     await signOut();
     navigate({ to: "/" });
@@ -131,12 +136,12 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
               <SidebarBody role={role} onNavigate={() => setOpen(false)} />
             </SheetContent>
           </Sheet>
-          <Button variant="ghost" size="icon" onClick={() => window.history.back()} title="Back">
+          <Button variant="ghost" size="icon" onClick={() => window.history.back()} title={t("nav_back")}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <nav className="hidden min-w-0 items-center gap-1 text-sm text-muted-foreground sm:flex">
             <Link to="/" className="hover:text-foreground">
-              Home
+              {t("nav_home")}
             </Link>
             {crumbs.map((c, i) => (
               <span key={i} className="flex items-center gap-1">
@@ -150,7 +155,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
           <div className="ml-auto flex items-center gap-2">
             <span className="hidden text-xs text-muted-foreground sm:inline">{user?.email}</span>
             <Button variant="outline" size="sm" onClick={handleSignOut}>
-              <LogOut className="mr-1 h-4 w-4" /> Logout
+              <LogOut className="mr-1 h-4 w-4" /> {t("nav_logout")}
             </Button>
           </div>
         </header>
