@@ -20,15 +20,14 @@ interface I18nContextProps {
 const I18nContext = createContext<I18nContextProps | undefined>(undefined);
 
 export const I18nProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguageState] = useState<Language>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('language') as Language | null;
-      if (stored === 'en' || stored === 'hi' || stored === 'te') {
-        return stored;
-      }
+  const [language, setLanguageState] = useState<Language>('en');
+
+  React.useEffect(() => {
+    const stored = localStorage.getItem('language') as Language | null;
+    if (stored === 'en' || stored === 'hi' || stored === 'te') {
+      setLanguageState(stored);
     }
-    return 'en';
-  });
+  }, []);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
