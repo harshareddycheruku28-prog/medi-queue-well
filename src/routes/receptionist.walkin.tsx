@@ -140,20 +140,21 @@ function Page() {
       }
     }
 
-    const { data: appt, error: apptError } = await supabase
-      .from("appointments")
-      .insert({
-        patient_id: finalPatientId,
-        doctor_id: doctorId,
-        department_id: departmentId,
-        appointment_date: date,
-        slot_time: slot,
-        symptoms,
-        token_number: 0,
-        token_code: "",
-      } as any)
-      .select("*, departments(name), doctors(profiles:profile_id(full_name))")
-      .single();
+    const { token_number, token_code } = await generateToken(departmentId, doctorId, date);
+        const { data: appt, error: apptError } = await supabase
+          .from("appointments")
+          .insert({
+            patient_id: finalPatientId,
+            doctor_id: doctorId,
+            department_id: departmentId,
+            appointment_date: date,
+            slot_time: slot,
+            symptoms,
+            token_number,
+            token_code,
+          } as any)
+          .select("*, departments(name), doctors(profiles:profile_id(full_name))")
+          .single();
 
     setBusy(false);
     if (apptError) {

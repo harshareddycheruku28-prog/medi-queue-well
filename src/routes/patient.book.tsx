@@ -107,8 +107,7 @@ function Page() {
         appointment_date: date,
         slot_time: slot,
         symptoms,
-        token_number: 0,
-        token_code: "",
+        ...(await generateToken(departmentId, doctorId, date)),
       } as any)
       .select("*, departments(name, code)")
       .single();

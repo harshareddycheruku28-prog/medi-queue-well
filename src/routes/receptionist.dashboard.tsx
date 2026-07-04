@@ -71,6 +71,21 @@ function Page() {
         <StatCard title={t("recep_dash_completed_count")} val={stats.completed} />
         <StatCard title={t("recep_dash_active_count")} val={stats.active} />
       </div>
+      {/* Assign Doctor to Patient section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("recep_dash_assign_doctor") ?? "Assign Doctor to Patient"}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild>
+              <Link to="/receptionist/walkin">
+                <UserPlus className="mr-2 h-4 w-4" /> {t("recep_dash_btn_walkin") ?? "Register Walk-in Patient"}
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle>{t("recep_dash_upcoming_appts")}</CardTitle>
@@ -115,5 +130,16 @@ function Page() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function StatCard({ title, val }: { title: string; val: number }) {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="text-sm text-muted-foreground">{title}</div>
+        <div className="mt-1 text-3xl font-bold">{val}</div>
+      </CardContent>
+    </Card>
   );
 }
